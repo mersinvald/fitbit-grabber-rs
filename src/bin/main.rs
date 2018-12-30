@@ -27,7 +27,7 @@ use chrono::NaiveDate;
 use clap::{App, Arg, SubCommand};
 
 mod config;
-use config::Config;
+use crate::config::Config;
 use fitbit::activities::Activities;
 use fitbit::date;
 use fitbit::user::User;

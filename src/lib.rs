@@ -25,7 +25,7 @@ pub mod query;
 pub mod serializers;
 pub mod user;
 
-use errors::Error;
+use crate::errors::Error;
 
 type Result<T> = std::result::Result<T, Error>;
 
