@@ -25,6 +25,7 @@ use std::str::FromStr;
 
 use chrono::NaiveDate;
 use clap::{App, Arg, SubCommand};
+use directories::ProjectDirs;
 
 mod config;
 use crate::config::Config;
@@ -34,8 +35,10 @@ use fitbit::user::User;
 
 fn main() -> Result<(), Error> {
     env_logger::init();
-    let default_dir = Path::new(&env::var("HOME")?).join(".config/fitbit-grabber");
-    let default_config = default_dir.clone().join("conf.toml");
+    let project_dirs = ProjectDirs::from("", "", "fitbit-grabber")
+        .ok_or(format_err!("app dirs do not exist"))?;
+    let config_path = project_dirs.config_dir();
+    let default_config = config_path.join("conf.toml");
     let date_arg = Arg::with_name("date")
         .long("date")
         .required(true)
@@ -80,7 +83,6 @@ fn main() -> Result<(), Error> {
         client_id,
         client_secret,
     } = conf.fitbit.unwrap();
-
     let auth = fitbit::FitbitAuth::new(&client_id.unwrap(), &client_secret.unwrap());
 
     if let Some(_) = matches.subcommand_matches("token") {
