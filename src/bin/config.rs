@@ -1,5 +1,6 @@
+use serde::{Serialize, Deserialize};
 use directories::ProjectDirs;
-use failure::Error;
+use failure::{Error, format_err};
 use std::env;
 use std::fs::File;
 use std::io::Read;

@@ -1,3 +1,4 @@
+use failure::Fail;
 use std::io;
 
 use chrono;

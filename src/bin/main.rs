@@ -1,21 +1,4 @@
-extern crate chrono;
-extern crate clap;
-extern crate env_logger;
-extern crate fitbit;
-extern crate oauth2;
-extern crate reqwest;
-extern crate serde_json;
-extern crate tiny_http;
-extern crate toml;
-extern crate url;
-#[macro_use]
-extern crate failure;
-
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-
-use failure::Error;
+use failure::{Error, format_err};
 
 use std::fs::File;
 use std::io::{Read, Write};

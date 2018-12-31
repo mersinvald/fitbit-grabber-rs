@@ -1,3 +1,4 @@
+use serde::{Serialize, Deserialize};
 use super::FitbitClient;
 use crate::errors::Error;
 

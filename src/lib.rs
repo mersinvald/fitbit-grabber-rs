@@ -1,20 +1,9 @@
-extern crate chrono;
-#[macro_use]
-extern crate log;
-extern crate oauth2;
-extern crate reqwest;
-extern crate url;
-#[macro_use]
-extern crate serde_derive;
-extern crate serde;
-extern crate tiny_http;
-#[macro_use]
-extern crate failure;
-
+use serde::{Serialize, Deserialize};
 use chrono::NaiveDate;
 use oauth2::{AuthType, Config as OAuth2Config};
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT};
 use reqwest::Method;
+use log::debug;
 
 // TODO: how to re-export public names?
 pub mod activities;
