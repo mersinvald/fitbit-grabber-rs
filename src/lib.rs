@@ -1,20 +1,9 @@
-extern crate chrono;
-#[macro_use]
-extern crate log;
-extern crate oauth2;
-extern crate reqwest;
-extern crate url;
-#[macro_use]
-extern crate serde_derive;
-extern crate serde;
-extern crate tiny_http;
-#[macro_use]
-extern crate failure;
-
 use chrono::NaiveDate;
+use log::debug;
 use oauth2::{AuthType, Config as OAuth2Config};
-use reqwest::header::{Authorization, Bearer, Headers, UserAgent};
+use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT};
 use reqwest::Method;
+use serde::{Deserialize, Serialize};
 
 // TODO: how to re-export public names?
 pub mod activities;
@@ -25,7 +14,7 @@ pub mod query;
 pub mod serializers;
 pub mod user;
 
-use errors::Error;
+use crate::errors::Error;
 
 type Result<T> = std::result::Result<T, Error>;
 
@@ -39,11 +28,15 @@ pub struct FitbitClient {
 
 impl FitbitClient {
     pub fn new(token: Token) -> Result<FitbitClient> {
-        let mut headers = Headers::new();
-        headers.set(Authorization(Bearer {
-            token: token.0.access_token,
-        }));
-        headers.set(UserAgent::new("fitbit-rs (0.1.0)"));
+        let mut headers = HeaderMap::new();
+
+        let bearer = format!("Bearer {}", token.0.access_token);
+        headers.insert(
+            AUTHORIZATION,
+            HeaderValue::from_str(&bearer)
+                .expect("Failed to form Bearer Auth header from the token"),
+        );
+        headers.insert(USER_AGENT, HeaderValue::from_static("fitbit-rs (0.1.0)"));
 
         let client = reqwest::Client::builder()
             .default_headers(headers)
@@ -57,11 +50,13 @@ impl FitbitClient {
     }
 
     pub fn user(&self) -> Result<String> {
-        let url = self.base
+        let url = self
+            .base
             .join("user/-/profile.json")
             .map_err(|e| Error::Url(e))?;
-        Ok(self.client
-            .request(reqwest::Method::Get, url)
+        Ok(self
+            .client
+            .request(Method::GET, url)
             .send()
             .and_then(|mut r| r.text())?)
     }
@@ -73,7 +68,7 @@ impl FitbitClient {
         );
         let url = self.base.join(&path).map_err(|e| Error::Url(e))?;
         self.client
-            .request(Method::Get, url)
+            .request(Method::GET, url)
             .send()
             .and_then(|mut r| r.text())
             .map_err(|e| Error::Http(e))
@@ -85,8 +80,9 @@ impl FitbitClient {
             date.format("%Y-%m-%d")
         );
         let url = self.base.join(&path).map_err(|e| Error::Url(e))?;
-        Ok(self.client
-            .request(Method::Get, url)
+        Ok(self
+            .client
+            .request(Method::GET, url)
             .send()
             .and_then(|mut r| r.text())
             .map_err(|e| Error::Http(e))?)
@@ -121,7 +117,7 @@ impl FitbitAuth {
         // This example will be running its own server at localhost:8080.
         // See below for the server implementation.
         // TODO configurable redirect?
-        config = config.set_redirect_url("http://localhost:8080");
+        config = config.set_redirect_url("http://127.0.0.1:8080");
 
         FitbitAuth(config)
     }
@@ -154,7 +150,7 @@ impl FitbitAuth {
 
         // FIXME avoid unwrap here
         let server =
-            tiny_http::Server::http("localhost:8080").expect("could not start http listener");
+            tiny_http::Server::http("127.0.0.1:8080").expect("could not start http listener");
         let request = server.recv()?;
         let url = request.url().to_string();
         let response = tiny_http::Response::from_string("Go back to your terminal :)");
@@ -179,7 +175,8 @@ impl FitbitAuth {
 
     pub fn exchange_refresh_token(&self, token: Token) -> Result<oauth2::Token> {
         match token.0.refresh_token {
-            Some(t) => self.0
+            Some(t) => self
+                .0
                 .exchange_refresh_token(t)
                 .map_err(|e| Error::AuthToken(e)),
             None => Err(Error::RefreshTokenMissing),

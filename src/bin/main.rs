@@ -1,23 +1,5 @@
-extern crate chrono;
-extern crate clap;
-extern crate env_logger;
-extern crate fitbit;
-extern crate oauth2;
-extern crate reqwest;
-extern crate serde_json;
-extern crate tiny_http;
-extern crate toml;
-extern crate url;
-#[macro_use]
-extern crate failure;
+use failure::{format_err, Error};
 
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-
-use failure::Error;
-
-use std::env;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::Path;
@@ -25,17 +7,20 @@ use std::str::FromStr;
 
 use chrono::NaiveDate;
 use clap::{App, Arg, SubCommand};
+use directories::ProjectDirs;
 
 mod config;
-use config::Config;
+use crate::config::Config;
 use fitbit::activities::Activities;
 use fitbit::date;
 use fitbit::user::User;
 
 fn main() -> Result<(), Error> {
     env_logger::init();
-    let default_dir = Path::new(&env::var("HOME")?).join(".config/fitbit-grabber");
-    let default_config = default_dir.clone().join("conf.toml");
+    let project_dirs =
+        ProjectDirs::from("", "", "fitbit-grabber").ok_or(format_err!("app dirs do not exist"))?;
+    let config_path = project_dirs.config_dir();
+    let default_config = config_path.join("conf.toml");
     let date_arg = Arg::with_name("date")
         .long("date")
         .required(true)
@@ -80,7 +65,6 @@ fn main() -> Result<(), Error> {
         client_id,
         client_secret,
     } = conf.fitbit.unwrap();
-
     let auth = fitbit::FitbitAuth::new(&client_id.unwrap(), &client_secret.unwrap());
 
     if let Some(_) = matches.subcommand_matches("token") {

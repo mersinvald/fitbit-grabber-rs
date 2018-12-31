@@ -1,4 +1,6 @@
-use failure::Error;
+use directories::ProjectDirs;
+use failure::{format_err, Error};
+use serde::{Deserialize, Serialize};
 use std::env;
 use std::fs::File;
 use std::io::Read;
@@ -48,11 +50,11 @@ impl Config {
                 }
             }
             None => {
+                let project_dirs = ProjectDirs::from("", "", "fitbit-grabber")
+                    .ok_or(format_err!("app dirs do not exist"))?;
                 // default path
-                let base_dir = env::home_dir().ok_or(format_err!("HOME does not exist"))?;
-                let joined_path =
-                    Path::join(Path::new(&base_dir), ".config/fitbit-grabber/conf.toml");
-                if let Ok(found) = Config::from_toml_file(joined_path) {
+                let config_path = project_dirs.config_dir().join("conf.toml");
+                if let Ok(found) = Config::from_toml_file(config_path) {
                     conf = found;
                 }
             }

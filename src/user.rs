@@ -1,5 +1,6 @@
 use super::FitbitClient;
-use errors::Error;
+use crate::errors::Error;
+use serde::{Deserialize, Serialize};
 
 /// UserProfile is a partial serialization struct of the Fitbit API profile. See:
 /// https://dev.fitbit.com/build/reference/web-api/user/
