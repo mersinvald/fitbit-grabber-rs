@@ -7,4 +7,4 @@
 # token file
 .token
 
-.Cargo.lock
+Cargo.lock
