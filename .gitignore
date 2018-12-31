@@ -6,3 +6,5 @@
 
 # token file
 .token
+
+.Cargo.lock
