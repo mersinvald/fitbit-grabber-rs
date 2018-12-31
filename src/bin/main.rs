@@ -1,4 +1,4 @@
-use failure::{Error, format_err};
+use failure::{format_err, Error};
 
 use std::fs::File;
 use std::io::{Read, Write};
@@ -17,8 +17,8 @@ use fitbit::user::User;
 
 fn main() -> Result<(), Error> {
     env_logger::init();
-    let project_dirs = ProjectDirs::from("", "", "fitbit-grabber")
-        .ok_or(format_err!("app dirs do not exist"))?;
+    let project_dirs =
+        ProjectDirs::from("", "", "fitbit-grabber").ok_or(format_err!("app dirs do not exist"))?;
     let config_path = project_dirs.config_dir();
     let default_config = config_path.join("conf.toml");
     let date_arg = Arg::with_name("date")

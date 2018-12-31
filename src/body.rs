@@ -1,9 +1,9 @@
-use serde::{Serialize, Deserialize};
 use super::FitbitClient;
-use chrono::NaiveDate;
 use crate::errors::Error;
 use crate::query::DateQuery;
 use crate::serializers::naive_date;
+use chrono::NaiveDate;
+use serde::{Deserialize, Serialize};
 
 pub trait Body {
     fn get_body_time_series(&self, q: DateQuery) -> Result<WeightSeriesResult, Error>;

@@ -1,9 +1,9 @@
-use serde::{Serialize, Deserialize};
 use chrono::NaiveDate;
+use log::debug;
 use oauth2::{AuthType, Config as OAuth2Config};
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT};
 use reqwest::Method;
-use log::debug;
+use serde::{Deserialize, Serialize};
 
 // TODO: how to re-export public names?
 pub mod activities;
@@ -31,8 +31,11 @@ impl FitbitClient {
         let mut headers = HeaderMap::new();
 
         let bearer = format!("Bearer {}", token.0.access_token);
-        headers.insert(AUTHORIZATION, HeaderValue::from_str(&bearer)
-            .expect("Failed to form Bearer Auth header from the token"));
+        headers.insert(
+            AUTHORIZATION,
+            HeaderValue::from_str(&bearer)
+                .expect("Failed to form Bearer Auth header from the token"),
+        );
         headers.insert(USER_AGENT, HeaderValue::from_static("fitbit-rs (0.1.0)"));
 
         let client = reqwest::Client::builder()
@@ -47,10 +50,12 @@ impl FitbitClient {
     }
 
     pub fn user(&self) -> Result<String> {
-        let url = self.base
+        let url = self
+            .base
             .join("user/-/profile.json")
             .map_err(|e| Error::Url(e))?;
-        Ok(self.client
+        Ok(self
+            .client
             .request(Method::GET, url)
             .send()
             .and_then(|mut r| r.text())?)
@@ -75,7 +80,8 @@ impl FitbitClient {
             date.format("%Y-%m-%d")
         );
         let url = self.base.join(&path).map_err(|e| Error::Url(e))?;
-        Ok(self.client
+        Ok(self
+            .client
             .request(Method::GET, url)
             .send()
             .and_then(|mut r| r.text())
@@ -169,7 +175,8 @@ impl FitbitAuth {
 
     pub fn exchange_refresh_token(&self, token: Token) -> Result<oauth2::Token> {
         match token.0.refresh_token {
-            Some(t) => self.0
+            Some(t) => self
+                .0
                 .exchange_refresh_token(t)
                 .map_err(|e| Error::AuthToken(e)),
             None => Err(Error::RefreshTokenMissing),
