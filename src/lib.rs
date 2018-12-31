@@ -121,7 +121,7 @@ impl FitbitAuth {
         // This example will be running its own server at localhost:8080.
         // See below for the server implementation.
         // TODO configurable redirect?
-        config = config.set_redirect_url("http://localhost:8080");
+        config = config.set_redirect_url("http://127.0.0.1:8080");
 
         FitbitAuth(config)
     }
@@ -154,7 +154,7 @@ impl FitbitAuth {
 
         // FIXME avoid unwrap here
         let server =
-            tiny_http::Server::http("localhost:8080").expect("could not start http listener");
+            tiny_http::Server::http("127.0.0.1:8080").expect("could not start http listener");
         let request = server.recv()?;
         let url = request.url().to_string();
         let response = tiny_http::Response::from_string("Go back to your terminal :)");
