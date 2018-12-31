@@ -30,7 +30,7 @@ To obtain a client ID and secret, [register an application][].
 1. For "OAuth 2.0 Application Type", select "Personal". The reason for this
    requirement is that intraday series data is only available for persoanl
    applications.
-2. For "Callback URL", enter "http://localhost:8080".
+2. For "Callback URL", enter "http://127.0.0.1:8080".
 
 After completing the registration, you will need to export the client id and
 secret as environmner variables:
