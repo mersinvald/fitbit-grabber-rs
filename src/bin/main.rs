@@ -17,7 +17,6 @@ extern crate serde_derive;
 
 use failure::Error;
 
-use std::env;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::Path;

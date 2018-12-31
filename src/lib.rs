@@ -13,7 +13,7 @@ extern crate failure;
 
 use chrono::NaiveDate;
 use oauth2::{AuthType, Config as OAuth2Config};
-use reqwest::header::{Authorization, Bearer, Headers, UserAgent};
+use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT};
 use reqwest::Method;
 
 // TODO: how to re-export public names?
@@ -39,11 +39,12 @@ pub struct FitbitClient {
 
 impl FitbitClient {
     pub fn new(token: Token) -> Result<FitbitClient> {
-        let mut headers = Headers::new();
-        headers.set(Authorization(Bearer {
-            token: token.0.access_token,
-        }));
-        headers.set(UserAgent::new("fitbit-rs (0.1.0)"));
+        let mut headers = HeaderMap::new();
+
+        let bearer = format!("Bearer {}", token.0.access_token);
+        headers.insert(AUTHORIZATION, HeaderValue::from_str(&bearer)
+            .expect("Failed to form Bearer Auth header from the token"));
+        headers.insert(USER_AGENT, HeaderValue::from_static("fitbit-rs (0.1.0)"));
 
         let client = reqwest::Client::builder()
             .default_headers(headers)
@@ -61,7 +62,7 @@ impl FitbitClient {
             .join("user/-/profile.json")
             .map_err(|e| Error::Url(e))?;
         Ok(self.client
-            .request(reqwest::Method::Get, url)
+            .request(Method::GET, url)
             .send()
             .and_then(|mut r| r.text())?)
     }
@@ -73,7 +74,7 @@ impl FitbitClient {
         );
         let url = self.base.join(&path).map_err(|e| Error::Url(e))?;
         self.client
-            .request(Method::Get, url)
+            .request(Method::GET, url)
             .send()
             .and_then(|mut r| r.text())
             .map_err(|e| Error::Http(e))
@@ -86,7 +87,7 @@ impl FitbitClient {
         );
         let url = self.base.join(&path).map_err(|e| Error::Url(e))?;
         Ok(self.client
-            .request(Method::Get, url)
+            .request(Method::GET, url)
             .send()
             .and_then(|mut r| r.text())
             .map_err(|e| Error::Http(e))?)
