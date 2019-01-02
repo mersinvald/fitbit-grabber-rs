@@ -9,6 +9,7 @@ It currently supports:
 - Heart Rate
 - Steps
 - User Profile
+- Sleep
 
 ## Building
 
