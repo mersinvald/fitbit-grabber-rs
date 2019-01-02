@@ -6,6 +6,12 @@ use crate::errors;
 #[derive(Debug)]
 pub struct Date(::chrono::NaiveDate);
 
+impl From<chrono::NaiveDate> for Date {
+    fn from(date: chrono::NaiveDate) -> Self {
+        Date(date)
+    }
+}
+
 impl FromStr for Date {
     type Err = errors::Error;
 

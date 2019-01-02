@@ -18,8 +18,14 @@ use crate::errors::Error;
 
 type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Token(oauth2::Token);
+
+impl From<oauth2::Token> for Token {
+    fn from(token: oauth2::Token) -> Self {
+        Token(token)
+    }
+}
 
 pub struct FitbitClient {
     client: reqwest::Client,
