@@ -3,7 +3,7 @@ use std::str::FromStr;
 
 use crate::errors;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Date(::chrono::NaiveDate);
 
 impl From<chrono::NaiveDate> for Date {
@@ -17,7 +17,7 @@ impl FromStr for Date {
 
     fn from_str(s: &str) -> crate::Result<Self> {
         ::chrono::NaiveDate::parse_from_str(s, "%Y-%m-%d")
-            .map(|d| Date(d))
+            .map(Date)
             .map_err(From::from)
     }
 }

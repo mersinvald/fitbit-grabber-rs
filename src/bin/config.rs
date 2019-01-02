@@ -51,7 +51,7 @@ impl Config {
             }
             None => {
                 let project_dirs = ProjectDirs::from("", "", "fitbit-grabber")
-                    .ok_or(format_err!("app dirs do not exist"))?;
+                    .ok_or_else(|| format_err!("app dirs do not exist"))?;
                 // default path
                 let config_path = project_dirs.config_dir().join("conf.toml");
                 if let Ok(found) = Config::from_toml_file(config_path) {

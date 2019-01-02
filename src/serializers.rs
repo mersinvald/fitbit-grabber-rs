@@ -2,6 +2,7 @@ pub mod naive_date {
     use chrono::NaiveDate;
     use serde::{self, Deserialize, Deserializer, Serializer};
 
+    #[allow(clippy::trivially_copy_pass_by_ref)]
     pub fn serialize<S>(date: &Option<NaiveDate>, s: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,

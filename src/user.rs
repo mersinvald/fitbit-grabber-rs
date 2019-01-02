@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 /// UserProfile is a partial serialization struct of the Fitbit API profile. See:
 /// https://dev.fitbit.com/build/reference/web-api/user/
+#[allow(missing_copy_implementations)]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UserProfile {
     age: i64,
