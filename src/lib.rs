@@ -1,3 +1,14 @@
+#![deny(
+    missing_debug_implementations,
+    missing_copy_implementations,
+    trivial_casts,
+    trivial_numeric_casts,
+    unsafe_code,
+    unstable_features,
+    unused_import_braces,
+    unused_qualifications
+)]
+
 use chrono::NaiveDate;
 use log::debug;
 use oauth2::{AuthType, Config as OAuth2Config};
@@ -28,6 +39,7 @@ impl From<oauth2::Token> for Token {
     }
 }
 
+#[derive(Debug)]
 pub struct FitbitClient {
     client: reqwest::Client,
     base_1: url::Url,
@@ -35,7 +47,8 @@ pub struct FitbitClient {
 }
 
 impl FitbitClient {
-    pub fn new(token: Token) -> Result<FitbitClient> {
+    #[allow(clippy::new_ret_no_self)]
+    pub fn new(token: &Token) -> Result<FitbitClient> {
         let mut headers = HeaderMap::new();
 
         let bearer = format!("Bearer {}", token.0.access_token);
@@ -52,7 +65,7 @@ impl FitbitClient {
             .map_err(|e| Error::Http(e))?;
 
         Ok(FitbitClient {
-            client: client,
+            client,
             base_1: url::Url::parse("https://api.fitbit.com/1/").unwrap(),
             base_1_2: url::Url::parse("https://api.fitbit.com/1.2/").unwrap(),
         })
@@ -110,6 +123,7 @@ impl FitbitClient {
     }
 }
 
+#[allow(missing_debug_implementations)]
 pub struct FitbitAuth(OAuth2Config);
 
 impl FitbitAuth {

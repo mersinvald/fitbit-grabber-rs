@@ -17,8 +17,8 @@ use fitbit::user::User;
 
 fn main() -> Result<(), Error> {
     env_logger::init();
-    let project_dirs =
-        ProjectDirs::from("", "", "fitbit-grabber").ok_or(format_err!("app dirs do not exist"))?;
+    let project_dirs = ProjectDirs::from("", "", "fitbit-grabber")
+        .ok_or_else(|| format_err!("app dirs do not exist"))?;
     let config_path = project_dirs.config_dir();
     let default_config = config_path.join("conf.toml");
     let date_arg = Arg::with_name("date")
@@ -67,24 +67,24 @@ fn main() -> Result<(), Error> {
     } = conf.fitbit.unwrap();
     let auth = fitbit::FitbitAuth::new(&client_id.unwrap(), &client_secret.unwrap());
 
-    if let Some(_) = matches.subcommand_matches("token") {
+    if matches.subcommand_matches("token").is_some() {
         let token = auth.get_token()?;
-        save_token(".token", token)?;
+        save_token(".token", &token)?;
     }
 
-    if let Some(_) = matches.subcommand_matches("refresh-token") {
+    if matches.subcommand_matches("refresh-token").is_some() {
         let token = load_token(".token")?;
         let exchanged = auth.exchange_refresh_token(token)?;
-        save_token(".token", exchanged)?;
+        save_token(".token", &exchanged)?;
     }
 
     let token = load_token(".token").unwrap();
-    let f = fitbit::FitbitClient::new(token)?;
+    let f = fitbit::FitbitClient::new(&token)?;
 
     if let Some(matches) = matches.subcommand_matches("heart") {
         let raw_date = matches
             .value_of("date")
-            .ok_or(format_err!("please give a starting date"))?;
+            .ok_or_else(|| format_err!("please give a starting date"))?;
         let date = NaiveDate::parse_from_str(&raw_date, "%Y-%m-%d")?;
         let heart_rate_data = f.heart(date)?;
         println!("{}", heart_rate_data);
@@ -93,14 +93,14 @@ fn main() -> Result<(), Error> {
     if let Some(matches) = matches.subcommand_matches("step") {
         let raw_date = matches
             .value_of("date")
-            .ok_or(format_err!("please give a starting date"))?;
+            .ok_or_else(|| format_err!("please give a starting date"))?;
         let date = NaiveDate::parse_from_str(&raw_date, "%Y-%m-%d")
             .map_err(|e| format_err!("could not parse date {}", e))?;
         let step_data = f.step(date)?;
         println!("{}", step_data);
     }
 
-    if let Some(_) = matches.subcommand_matches("user") {
+    if matches.subcommand_matches("user").is_some() {
         let profile = f.get_user_profile()?;
         println!("{:?}", profile);
     }
@@ -108,7 +108,7 @@ fn main() -> Result<(), Error> {
     if let Some(matches) = matches.subcommand_matches("daily-activity-summary") {
         let raw_date = matches
             .value_of("date")
-            .ok_or(format_err!("please give a starting date"))?;
+            .ok_or_else(|| format_err!("please give a starting date"))?;
         let date = date::Date::from_str(raw_date)?;
         let summary = f.get_daily_activity_summary("-", &date)?;
         println!("{}", summary);
@@ -117,11 +117,11 @@ fn main() -> Result<(), Error> {
     Ok(()) // ok!
 }
 
-fn save_token(filename: &str, token: oauth2::Token) -> Result<(), Error> {
+fn save_token(filename: &str, token: &oauth2::Token) -> Result<(), Error> {
     let json = serde_json::to_string(&token).unwrap();
     let path = Path::new(filename);
-
-    Ok(File::create(&path).and_then(|mut file| file.write_all(json.as_bytes()))?)
+    File::create(&path).and_then(|mut file| file.write_all(json.as_bytes()))?;
+    Ok(())
 }
 
 fn load_token(filename: &str) -> Result<fitbit::Token, Error> {
