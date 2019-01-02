@@ -26,7 +26,7 @@ impl Body for FitbitClient {
             ),
             _ => unimplemented!(), // TODO: missing an error type?
         };
-        let url = self.base.join(&url)?;
+        let url = self.base_1.join(&url)?;
         Ok(self.client.get(url).send()?.json()?)
     }
 }

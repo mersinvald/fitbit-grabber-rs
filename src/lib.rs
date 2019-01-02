@@ -12,18 +12,26 @@ pub mod date;
 pub mod errors;
 pub mod query;
 pub mod serializers;
+pub mod sleep;
 pub mod user;
 
 use crate::errors::Error;
 
 type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Token(oauth2::Token);
+
+impl From<oauth2::Token> for Token {
+    fn from(token: oauth2::Token) -> Self {
+        Token(token)
+    }
+}
 
 pub struct FitbitClient {
     client: reqwest::Client,
-    base: url::Url,
+    base_1: url::Url,
+    base_1_2: url::Url,
 }
 
 impl FitbitClient {
@@ -45,13 +53,14 @@ impl FitbitClient {
 
         Ok(FitbitClient {
             client: client,
-            base: url::Url::parse("https://api.fitbit.com/1/").unwrap(),
+            base_1: url::Url::parse("https://api.fitbit.com/1/").unwrap(),
+            base_1_2: url::Url::parse("https://api.fitbit.com/1.2/").unwrap(),
         })
     }
 
     pub fn user(&self) -> Result<String> {
         let url = self
-            .base
+            .base_1
             .join("user/-/profile.json")
             .map_err(|e| Error::Url(e))?;
         Ok(self
@@ -66,7 +75,7 @@ impl FitbitClient {
             "user/-/activities/heart/date/{}/1d.json",
             date.format("%Y-%m-%d")
         );
-        let url = self.base.join(&path).map_err(|e| Error::Url(e))?;
+        let url = self.base_1.join(&path).map_err(|e| Error::Url(e))?;
         self.client
             .request(Method::GET, url)
             .send()
@@ -79,7 +88,7 @@ impl FitbitClient {
             "user/-/activities/steps/date/{}/1d.json",
             date.format("%Y-%m-%d")
         );
-        let url = self.base.join(&path).map_err(|e| Error::Url(e))?;
+        let url = self.base_1.join(&path).map_err(|e| Error::Url(e))?;
         Ok(self
             .client
             .request(Method::GET, url)
@@ -89,7 +98,13 @@ impl FitbitClient {
     }
 
     fn do_get(&self, path: &str) -> Result<String> {
-        let url = self.base.join(&path)?;
+        let url = self.base_1.join(&path)?;
+        debug!("GET - {:?}", url);
+        Ok(self.client.get(url).send()?.text()?)
+    }
+
+    fn do_get_1_2(&self, path: &str) -> Result<String> {
+        let url = self.base_1_2.join(&path)?;
         debug!("GET - {:?}", url);
         Ok(self.client.get(url).send()?.text()?)
     }
@@ -113,6 +128,7 @@ impl FitbitAuth {
         config = config.add_scope("heartrate");
         config = config.add_scope("profile");
         config = config.add_scope("weight");
+        config = config.add_scope("sleep");
 
         // This example will be running its own server at localhost:8080.
         // See below for the server implementation.
